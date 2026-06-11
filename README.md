@@ -5,3 +5,5 @@
 Context and hacking journey: https://x.com/merybenavente/status/2065018276019589430
 
 The OpenSCAD files are in `3d_models/` — feel free to print, tweak, and open PRs!
+
+![Sagrada Familia Lamp](3d_models/lamp_photo.jpg)
