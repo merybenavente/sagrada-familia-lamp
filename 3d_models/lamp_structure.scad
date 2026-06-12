@@ -1,26 +1,26 @@
 // ============================================
-// Columna facetada - estilo Gaudí
-// Alto: 240mm, encaja en base de 60x50mm
-// Sólida, con cintura, facetas triangulares
+// Faceted column - Gaudí style
+// Height: 240mm, fits 60x50mm base
+// Solid, with waist, triangular facets
 // ============================================
 
-/* [Columna] */
-total_h   = 240;  // Altura total (mm) [50:10:500]
-base_w    = 55;   // Ancho base (mm) [10:1:150]
-base_d    = 45;   // Profundidad base (mm) [10:1:150]
-top_w     = 40;   // Ancho arriba (mm) [10:1:150]
-top_d     = 33;   // Profundidad arriba (mm) [10:1:150]
-waist_w   = 28;   // Ancho cintura (mm) [10:1:150]
-waist_d   = 23;   // Profundidad cintura (mm) [10:1:150]
-waist_pos = 0.42; // Posición cintura [0:0.01:1]
-sections  = 24;   // Secciones (más = más suave) [8:1:64]
+/* [Column] */
+total_h   = 240;  // Total height (mm) [50:10:500]
+base_w    = 55;   // Base width (mm) [10:1:150]
+base_d    = 45;   // Base depth (mm) [10:1:150]
+top_w     = 40;   // Top width (mm) [10:1:150]
+top_d     = 33;   // Top depth (mm) [10:1:150]
+waist_w   = 28;   // Waist width (mm) [10:1:150]
+waist_d   = 23;   // Waist depth (mm) [10:1:150]
+waist_pos = 0.42; // Waist position [0:0.01:1]
+sections  = 24;   // Sections (more = smoother) [8:1:64]
 
 /* [Base] */
-plinth_w = 75;  // Ancho de la base (mm) [10:1:200]
-plinth_d = 65;  // Profundidad de la base (mm) [10:1:200]
-plinth_h = 8;   // Altura de la base (mm) [2:1:30]
+plinth_w = 75;  // Base width (mm) [10:1:200]
+plinth_d = 65;  // Base depth (mm) [10:1:200]
+plinth_h = 8;   // Base height (mm) [2:1:30]
 
-// --- Perfil ---
+// --- Profile ---
 function smooth(t) = t * t * (3 - 2 * t);
 
 function profile_w(t) =
@@ -44,6 +44,7 @@ module faceted_column() {
         w1 = profile_w(t1) / 2;
         d1 = profile_d(t1) / 2;
 
+        // Alternating rotation for diamond/facet effect
         rot0 = (i % 2 == 0) ? 0 : 45;
         rot1 = (i % 2 == 0) ? 45 : 0;
 
@@ -74,11 +75,11 @@ square_base();
 faceted_column();
 
 // ============================================
-// NOTAS:
-// - Base: ~55x45mm → encaja en caja 60x50mm
-// - Imprimir vertical (base abajo)
-// - Layer height: 0.2mm, infill 15% suficiente
-// - No necesita soportes
-// - Si quieres ajustar la cintura: cambia waist_pos
-//   (0.3 = más abajo, 0.5 = centro exacto)
+// NOTES:
+// - Base: ~55x45mm -> fits 60x50mm box
+// - Print vertically (base down)
+// - Layer height: 0.2mm, 15% infill is enough
+// - No supports needed
+// - To adjust the waist: change waist_pos
+//   (0.3 = lower, 0.5 = exact center)
 // ============================================
