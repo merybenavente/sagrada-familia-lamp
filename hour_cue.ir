@@ -1,0 +1,13 @@
+Filetype: IR signals file
+Version: 1
+#
+# Warm white with fade-in AND fade-out for PixMob Diamond lamp.
+# Color: R=255 G=210 B=90 (warm white, less orange)
+# Fade: 2.4s in, 3.8s hold, 2.4s out
+# Use with Flipper Zero IR transmitter.
+#
+name: WARM_WHITE_FADE_SLOW
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 700 1400 1400 700 700 700 1400 2800 700 1400 700 700 700 2100 700 1400 1400 1400 700 2100 700 2800 700 1400 700 700 1400 700 700 700 700 700 700 1400 700 1400 700 2800 700
