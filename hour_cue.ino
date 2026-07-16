@@ -8,12 +8,9 @@ const char* WIFI_SSID = "YOUR_WIFI_NAME";
 const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
 
 const char* TZ_INFO = "CET-1CEST,M3.5.0,M10.5.0/3";  // Barcelona. New York: "EST5EDT,M3.2.0,M11.1.0"
-
-const int ACTIVE_START = 9;    // fire from 09:00 ...
-const int ACTIVE_END   = 22;   // ... through 22:00
 // -----------------------------------------------
 
-IRsend irsend(10);
+IRsend irsend(9);  // D10 on XIAO ESP32S3 = GPIO 9
 
 uint16_t WARM_WHITE[] = {
   700,1400,1400,700,700,700,1400,2800,700,1400,700,700,700,2100,700,1400,1400,
@@ -21,10 +18,6 @@ uint16_t WARM_WHITE[] = {
   1400,700,2800,700
 };
 const uint16_t LEN = sizeof(WARM_WHITE) / sizeof(WARM_WHITE[0]);
-
-RTC_DATA_ATTR uint32_t bootMagic    = 0;
-RTC_DATA_ATTR time_t   estimatedNow = 0;
-RTC_DATA_ATTR int      lastSyncYday = -1;
 
 void fireEffect() {
   irsend.begin();
@@ -34,7 +27,7 @@ void fireEffect() {
   }
 }
 
-bool syncTimeOverWifi() {
+bool syncNTP() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   unsigned long start = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - start < 15000) delay(250);
@@ -54,30 +47,23 @@ void setup() {
   setenv("TZ", TZ_INFO, 1);
   tzset();
 
-  bool coldBoot = (bootMagic != 0xCAFE);
-
-  struct tm now;
-  if (!coldBoot) localtime_r(&estimatedNow, &now);
-
-  if (coldBoot || now.tm_yday != lastSyncYday) {
-    if (syncTimeOverWifi()) {
-      time(&estimatedNow);
-      localtime_r(&estimatedNow, &now);
-      lastSyncYday = now.tm_yday;
-      bootMagic = 0xCAFE;
-    } else if (coldBoot) {
-      esp_sleep_enable_timer_wakeup(300ULL * 1000000ULL);
-      esp_deep_sleep_start();
-    }
+  // Sync real time every wake via NTP
+  if (!syncNTP()) {
+    // No WiFi, retry in 5 min
+    esp_sleep_enable_timer_wakeup(300ULL * 1000000ULL);
+    esp_deep_sleep_start();
   }
 
-  bool inWindow  = (now.tm_hour >= ACTIVE_START && now.tm_hour <= ACTIVE_END);
-  bool topOfHour = (now.tm_min == 0 && now.tm_sec < 59);
-  if (inWindow && topOfHour) fireEffect();
+  struct tm now;
+  time_t t = time(NULL);
+  localtime_r(&t, &now);
 
+  // Fire if within 2 minutes of the hour (before or after)
+  if (now.tm_min <= 1 || now.tm_min >= 59) fireEffect();
+
+  // Sleep until next hour
   int secsToNext = 3600 - (now.tm_min * 60 + now.tm_sec);
-  if (secsToNext < 1) secsToNext = 1;
-  estimatedNow += secsToNext;
+  if (secsToNext < 60) secsToNext += 3600;
   esp_sleep_enable_timer_wakeup((uint64_t)secsToNext * 1000000ULL);
   esp_deep_sleep_start();
 }
